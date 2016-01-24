@@ -33,7 +33,7 @@ def AddPost(content):
     '''
     DB = psycopg2.connect("dbname=forum")
     c = DB.cursor()
-    c.execute("insert into posts (content) values ('%s')" % content)
+    c.execute("insert into posts (content) values (%s)", (content,))
     DB.commit()
     DB.close()
    
