@@ -3,8 +3,12 @@
 # 
 
 import psycopg2
+import bleach
+
 
 ## Database connection
+
+
 
 ## Get posts from database.
 def GetAllPosts():
@@ -38,3 +42,16 @@ def AddPost(content):
     DB.close()
    
 
+##Delete bad posts
+
+def DeleteBadPosts():
+    ''' Delete problematic posts from the database
+
+    ''' 
+    DB = psycopg2.connect("dbname=forum")
+    c = DB.cursor()
+    blank = 'now blank'
+    problem = '%h2%'
+    c.execute("""UPDATE posts set content = %s WHERE content like %s""", (blank, problem))
+    DB.commit()
+    DB.close
