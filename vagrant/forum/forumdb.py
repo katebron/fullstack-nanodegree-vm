@@ -51,7 +51,6 @@ def DeleteBadPosts():
     DB = psycopg2.connect("dbname=forum")
     c = DB.cursor()
     blank = 'now blank'
-    problem = '%h2%'
-    c.execute("""UPDATE posts set content = %s WHERE content like %s""", (blank, problem))
+    c.execute("""DELETE from posts WHERE content like %s""", (blank,))
     DB.commit()
     DB.close
