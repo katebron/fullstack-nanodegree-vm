@@ -13,17 +13,17 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
-   conn = connect()
-   c = conn.cursor()
-   c.execute("DROP * FROM match")
-   conn.commit()
-   conn.close()
+    conn = connect()
+    c = conn.cursor()
+    c.execute("DELETE FROM match")
+    conn.commit()
+    conn.close()
 
 def deletePlayers():
     """Remove all the player records from the database."""
     conn = connect()
     c = conn.cursor()
-    c.execute("DROP * FROM player")
+    c.execute("DELETE FROM player")
     conn.commit()
     conn.close()
 
@@ -31,8 +31,8 @@ def countPlayers():
     """Returns the number of players currently registered."""
     conn = connect()
     c = conn.cursor()
-    c.execute("SELECT COUNT (*) num FROM PLAYER ")
-    count = c.fetchall()
+    c.execute("SELECT COUNT (*) as num FROM PLAYER")
+    (count,) = c.fetchone()
     conn.commit()
     conn.close()
 
@@ -67,6 +67,30 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    conn = connect()
+    c = conn.cursor()
+    c.execute("UPDATE player SET total_score"
+              " = (select count(*) from match where winner = player_id)")
+    conn.commit()
+
+    c.execute("select player_id as id, name, total_score as wins,"
+              "count(match.player_1_id) as num from"
+              " player left join match on player.player_id = player_1_id OR player_id = player_2_id"
+              " group by name, player_id,total_score order by wins DESC")
+    '''standings = ({'matches':str(row[3]),'wins':str(row[2]),'name': str(row[1]), 'id': str(row[0])}
+      for row in c.fetchall())
+    '''
+    standings = c.fetchall()
+    conn.commit()
+    conn.close()
+    return standings
+
+    '''
+    
+tournament=> SELECT name, count (match.winner) as num from player left join match on player.player_id = match.winner group by name order by num DESC;
+    
+SELECT name, count(*) as match_times from match,player  where player.player_id = match.player_1_id OR player.player_id = match.player_2_id GROUP BY name;
+    '''
 
 
 def reportMatch(winner, loser):
