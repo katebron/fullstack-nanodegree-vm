@@ -77,20 +77,12 @@ def playerStandings():
               "count(match.player_1_id) as num from"
               " player left join match on player.player_id = player_1_id OR player_id = player_2_id"
               " group by name, player_id,total_score order by wins DESC")
-    '''standings = ({'matches':str(row[3]),'wins':str(row[2]),'name': str(row[1]), 'id': str(row[0])}
-      for row in c.fetchall())
-    '''
+    
     standings = c.fetchall()
     conn.commit()
     conn.close()
     return standings
 
-    '''
-    
-tournament=> SELECT name, count (match.winner) as num from player left join match on player.player_id = match.winner group by name order by num DESC;
-    
-SELECT name, count(*) as match_times from match,player  where player.player_id = match.player_1_id OR player.player_id = match.player_2_id GROUP BY name;
-    '''
 
 
 def reportMatch(winner, loser):
@@ -100,7 +92,12 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
- 
+    conn = connect()
+    c = conn.cursor()
+    c.execute("INSERT into match (player_1_id, player_2_id, winner)"
+              "values (%s, %s, %s)", (winner, loser, winner,))
+    conn.commit()
+    conn.close()
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.

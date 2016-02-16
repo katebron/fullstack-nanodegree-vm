@@ -79,7 +79,7 @@ def testStandingsBeforeMatches():
     print "6. Newly registered players appear in the standings with no matches."
 
 
-'''def testReportMatches():
+def testReportMatches():
     deleteMatches()
     deletePlayers()
     registerPlayer("Bruno Walton")
@@ -101,7 +101,7 @@ def testStandingsBeforeMatches():
     print "7. After a match, players have updated standings."
 
 
-def testPairings():
+'''def testPairings():
     deleteMatches()
     deletePlayers()
     registerPlayer("Twilight Sparkle")
@@ -132,7 +132,8 @@ if __name__ == '__main__':
     testRegister()
     testRegisterCountDelete()
     testStandingsBeforeMatches()
-    '''testReportMatches()
+    testReportMatches()
+    '''
     testPairings()
     '''
     print "Success!  All tests pass!"
