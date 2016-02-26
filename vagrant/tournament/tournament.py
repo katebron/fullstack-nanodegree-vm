@@ -54,6 +54,24 @@ def registerPlayer(name):
     conn.commit()
     conn.close()
 
+def updateStandings():
+    """Creates a view of player standings that can be referred to 
+       throughout the match.
+    """ 
+    conn = connect()
+    c = conn.cursor()
+    c.execute("UPDATE player SET total_score"
+              " = (select count(*) from match where winner = player_id)")
+    conn.commit()
+
+    c.execute("CREATE OR REPLACE VIEW standings as select player_id as id, name, total_score as wins,"
+              "count(match.player_1_id) as num from"
+              " player left join match on player.player_id = player_1_id OR player_id = player_2_id"
+              " group by name, player_id,total_score order by wins DESC")  
+    conn.commit()
+    conn.close()           
+
+
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
@@ -67,16 +85,15 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    updateStandings()
+    
     conn = connect()
     c = conn.cursor()
     c.execute("UPDATE player SET total_score"
               " = (select count(*) from match where winner = player_id)")
     conn.commit()
 
-    c.execute("select player_id as id, name, total_score as wins,"
-              "count(match.player_1_id) as num from"
-              " player left join match on player.player_id = player_1_id OR player_id = player_2_id"
-              " group by name, player_id,total_score order by wins DESC")
+    c.execute("select * from standings")
     
     standings = c.fetchall()
     conn.commit()
@@ -114,5 +131,34 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+    conn = connect()
+    c = conn.cursor()
 
+    c.execute("UPDATE player SET total_score"
+              " = (select count(*) from match where winner = player_id)")
+    conn.commit()
+    
+    '''Update the view standings'''
+    updateStandings()
+
+    '''Make a new view to put a rank on each player
+       based on their current standing
+    '''
+    c.execute("CREATE OR REPLACE VIEW rank as SELECT *,"
+               "row_number() OVER(ORDER BY id ASC)"
+               "as row FROM standings")  
+
+    '''Join the view to itself and select out even and 
+       odd standing winners to get them in pairs
+    '''
+    c.execute("select o.id as id1, o.name as name1,"
+              " e.id as id2, e.name as name2 from"
+              " rank e JOIN"
+              " (select * from rank WHERE MOD(row,2) = 1) o ON"
+              " e.row = o.row + 1")
+    pairings = c.fetchall()
+    conn.commit()
+    conn.close()
+
+    return pairings;
 
