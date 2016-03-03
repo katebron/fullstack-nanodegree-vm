@@ -4,39 +4,29 @@
 #
 
 import psycopg2
+import db
 
 
-def connect():
+
+'''def connect():
     """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
-
-
+    conn = db.DB()
+    return conn
+'''
 def deleteMatches():
     """Remove all the match records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("DELETE FROM match")
-    conn.commit()
-    conn.close()
+    db.DB().execute("DELETE FROM match", True)
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("DELETE FROM player")
-    conn.commit()
-    conn.close()
+    db.DB().execute("DELETE FROM player", True)
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    conn = connect()
-    c = conn.cursor()
-    c.execute("SELECT COUNT (*) as num FROM PLAYER")
-    (count,) = c.fetchone()
-    conn.commit()
-    conn.close()
-
-    return count
+    conn = db.DB().execute("SELECT count(*) FROM player")
+    cursor = conn["cursor"].fetchone()
+    conn['conn'].close()
+    return cursor[0]
 
 
 def registerPlayer(name):
@@ -48,29 +38,20 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT into player (name) values (%s)", (name,))
-    conn.commit()
-    conn.close()
-
-def updateStandings():
-    """Creates a view of player standings that can be referred to 
-       throughout the match.
-    """ 
-    conn = connect()
-    c = conn.cursor()
-    c.execute("UPDATE player SET total_score"
-              " = (select count(*) from match where winner = player_id)")
-    conn.commit()
-
-    c.execute("CREATE OR REPLACE VIEW standings as select player_id as id, name, total_score as wins,"
+    #query = "INSERT into player (name) values ('%s')" % (name)
+    #db.DB().execute(query, True)
+    db.DB().execute(("INSERT into player (name) values (%s)", ("name",)), True)
+"""NOt sure if needed: def updateStandings():
+    #Creates a view of player standings that can be referred to 
+       #throughout the match.
+    
+    db.DB.execute("CREATE OR REPLACE VIEW standings as select player_id as id, name, total_score as wins,"
               "count(match.player_1_id) as num from"
               " player left join match on player.player_id = player_1_id OR player_id = player_2_id"
-              " group by name, player_id,total_score order by wins DESC")  
+              " group by name, player_id,total_score order by wins DESC", True)  
     conn.commit()
     conn.close()           
-
+"""
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
@@ -85,22 +66,39 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    updateStandings()
-    
-    conn = connect()
-    c = conn.cursor()
-    c.execute("UPDATE player SET total_score"
-              " = (select count(*) from match where winner = player_id)")
-    conn.commit()
+    """Create a view that shows player_id and wins"""
+    db.DB().execute("CREATE or REPLACE VIEW wins AS select player_id,"
+                    "COUNT(player_id = winner) as wins FROM"
+                    " player JOIN match on player_id = winner"
+                    " GROUP BY player_id")
 
-    c.execute("select * from standings")
-    
-    standings = c.fetchall()
-    conn.commit()
-    conn.close()
-    return standings
+    """CREATE VIEW wins AS select player_id, COUNT(player_id = winner) as wins FROM player JOIN match on player_id = winner GROUP BY player_id;
+    """
+
+    """Create a view that shows player_id and matches"""
+    db.DB().execute("CREATE or REPLACE VIEW matches as select player_id,"
+                    " COUNT(player_id = player_1_id OR player_id = player_2_id)"
+                    " as matches FROM player JOIN match on "
+                    "player_id = player_1_id OR player_id = player_2_id"
+                    " GROUP BY player_id")
 
 
+    """CREATE VIEW matches as select player_id, COUNT(player_id = player_1_id OR player_id = player_2_id) as matches FROM player JOIN match on player_id = player_1_id OR player_id = player_2_id GROUP BY player_id;
+    """
+
+    """Retrieve player name and matches and wins from a left joining player to matches and matches to wins"""
+ 
+    conn = db.DB().execute("SELECT player.player_id as id, player.name, matches.matches, wins.wins"
+                    " FROM player LEFT JOIN matches on player.player_id = matches.player_id"
+                    " LEFT JOIN wins ON matches.player_id = wins.player_id");
+
+    """select player.name, player.player_id as id, matches.matches, wins.wins FROM player LEFT JOIN matches on player.player_id = matches.player_id LEFT JOIN wins ON matches.player_id = wins.player_id;
+    """
+    #standings = c.fetchall()
+    cursor = conn["cursor"].fetchall()
+    conn['conn'].close()
+    return cursor
+    #return standings
 
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
