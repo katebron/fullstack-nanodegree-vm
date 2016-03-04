@@ -53,7 +53,7 @@ def updateStandings():
     " player.player_id as id, player.name, wins.wins, "
     "matches.matches FROM player LEFT JOIN matches on "
     "player.player_id = matches.player_id LEFT JOIN wins ON "
-    "matches.player_id = wins.player_id")
+    "matches.player_id = wins.player_id ORDER BY wins.wins")
     db.DB().execute(query, True)     
 
 
