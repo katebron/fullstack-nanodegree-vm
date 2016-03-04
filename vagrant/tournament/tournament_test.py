@@ -97,7 +97,8 @@ def testReportMatches():
             raise ValueError("Each player should have one match recorded.")
         if i in (id1, id3) and w != 1:
             raise ValueError("Each match winner should have one win recorded.")
-        elif i in (id2, id4) and w != 0:
+            '''changed to account for none and 0'''
+        elif i in (id2, id4) and w not in (0,None):
             raise ValueError("Each match loser should have zero wins recorded.")
     print "7. After a match, players have updated standings."
     deleteMatches()
@@ -105,9 +106,11 @@ def testReportMatches():
     if len(standings) != 4:
         raise ValueError("Match deletion should not change number of players in standings.")
     for (i, n, w, m) in standings:
-        if m != 0:
+        '''change to account for none and 0'''
+        if m not in (0,None):
             raise ValueError("After deleting matches, players should have zero matches recorded.")
-        if w != 0:
+        '''change to account for none and 0'''
+        if w not in (0,None):
             raise ValueError("After deleting matches, players should have zero wins recorded.")
     print "8. After match deletion, player standings are properly reset.\n9. Matches are properly deleted."
 

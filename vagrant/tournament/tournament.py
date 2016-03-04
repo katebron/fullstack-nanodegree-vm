@@ -37,21 +37,25 @@ def registerPlayer(name):
   
     Args:
       name: the player's full name (need not be unique).
+      Using $$ to escape single-quote error 
+      http://stackoverflow.com/questions/12316953/insert-varchar-with-single-quotes-in-postgresql
     """
-    #query = "INSERT into player (name) values ('%s')" % (name)
+    query = "INSERT into player (name) values ($$%s$$)" % (name,)
     #db.DB().execute(query, True)
-    db.DB().execute(("INSERT into player (name) values (%s)", ("name",)), True)
-"""NOt sure if needed: def updateStandings():
-    #Creates a view of player standings that can be referred to 
-       #throughout the match.
-    
-    db.DB.execute("CREATE OR REPLACE VIEW standings as select player_id as id, name, total_score as wins,"
-              "count(match.player_1_id) as num from"
-              " player left join match on player.player_id = player_1_id OR player_id = player_2_id"
-              " group by name, player_id,total_score order by wins DESC", True)  
-    conn.commit()
-    conn.close()           
-"""
+    db.DB().execute(query, True)
+
+
+def updateStandings():
+    '''Creates a view of player standings that can be referred to 
+       throughout the match.'''
+
+    query = ("CREATE OR REPLACE VIEW standings as SELECT "
+    " player.player_id as id, player.name, wins.wins, "
+    "matches.matches FROM player LEFT JOIN matches on "
+    "player.player_id = matches.player_id LEFT JOIN wins ON "
+    "matches.player_id = wins.player_id")
+    db.DB().execute(query, True)     
+
 
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
@@ -88,9 +92,9 @@ def playerStandings():
 
     """Retrieve player name and matches and wins from a left joining player to matches and matches to wins"""
  
-    conn = db.DB().execute("SELECT player.player_id as id, player.name, matches.matches, wins.wins"
-                    " FROM player LEFT JOIN matches on player.player_id = matches.player_id"
-                    " LEFT JOIN wins ON matches.player_id = wins.player_id");
+    updateStandings()
+
+    conn = db.DB().execute("SELECT * from standings")
 
     """select player.name, player.player_id as id, matches.matches, wins.wins FROM player LEFT JOIN matches on player.player_id = matches.player_id LEFT JOIN wins ON matches.player_id = wins.player_id;
     """
@@ -107,12 +111,9 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    conn = connect()
-    c = conn.cursor()
-    c.execute("INSERT into match (player_1_id, player_2_id, winner)"
-              "values (%s, %s, %s)", (winner, loser, winner,))
-    conn.commit()
-    conn.close()
+    query = "INSERT into match (player_1_id, player_2_id, winner) values (%s, %s, %s)" % (winner, loser, winner,)
+    db.DB().execute(query, True)
+    
  
 def swissPairings():
     """Returns a list of pairs of players for the next round of a match.
@@ -129,12 +130,6 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
-    conn = connect()
-    c = conn.cursor()
-
-    c.execute("UPDATE player SET total_score"
-              " = (select count(*) from match where winner = player_id)")
-    conn.commit()
     
     '''Update the view standings'''
     updateStandings()
@@ -142,21 +137,19 @@ def swissPairings():
     '''Make a new view to put a rank on each player
        based on their current standing
     '''
-    c.execute("CREATE OR REPLACE VIEW rank as SELECT *,"
-               "row_number() OVER(ORDER BY id ASC)"
-               "as row FROM standings")  
+    db.DB().execute("CREATE OR REPLACE VIEW rank as SELECT *,"
+               "row_number() OVER(ORDER BY wins ASC)"
+               "as row FROM standings", True)  
 
     '''Join the view to itself and select out even and 
        odd standing winners to get them in pairs
     '''
-    c.execute("select o.id as id1, o.name as name1,"
+    conn = db.DB().execute("select o.id as id1, o.name as name1,"
               " e.id as id2, e.name as name2 from"
               " rank e JOIN"
               " (select * from rank WHERE MOD(row,2) = 1) o ON"
               " e.row = o.row + 1")
-    pairings = c.fetchall()
-    conn.commit()
-    conn.close()
-
-    return pairings;
-
+    
+    cursor = conn["cursor"].fetchall()
+    conn['conn'].close()
+    return cursor
