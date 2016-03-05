@@ -74,21 +74,15 @@ def playerStandings():
     db.DB().execute("CREATE or REPLACE VIEW wins AS select player_id,"
                     "COUNT(player_id = winner) as wins FROM"
                     " player JOIN match on player_id = winner"
-                    " GROUP BY player_id")
-
-    """CREATE VIEW wins AS select player_id, COUNT(player_id = winner) as wins FROM player JOIN match on player_id = winner GROUP BY player_id;
-    """
+                    " GROUP BY player_id", True)
 
     """Create a view that shows player_id and matches"""
     db.DB().execute("CREATE or REPLACE VIEW matches as select player_id,"
                     " COUNT(player_id = player_1_id OR player_id = player_2_id)"
                     " as matches FROM player JOIN match on "
                     "player_id = player_1_id OR player_id = player_2_id"
-                    " GROUP BY player_id")
+                    " GROUP BY player_id", True)
 
-
-    """CREATE VIEW matches as select player_id, COUNT(player_id = player_1_id OR player_id = player_2_id) as matches FROM player JOIN match on player_id = player_1_id OR player_id = player_2_id GROUP BY player_id;
-    """
 
     """Retrieve player name and matches and wins from a left joining player to matches and matches to wins"""
  
@@ -96,8 +90,6 @@ def playerStandings():
 
     conn = db.DB().execute("SELECT * from standings")
 
-    """select player.name, player.player_id as id, matches.matches, wins.wins FROM player LEFT JOIN matches on player.player_id = matches.player_id LEFT JOIN wins ON matches.player_id = wins.player_id;
-    """
     #standings = c.fetchall()
     cursor = conn["cursor"].fetchall()
     conn['conn'].close()
