@@ -1,4 +1,4 @@
-from flask import flask
+from flask import Flask
 #create an instance of class flask with the name
 #the name of the running application is the argument
 #anytime we run an application in python,
@@ -6,11 +6,17 @@ from flask import flask
 #defined for the application and all the imports it uses
 app = Flask(__name__)
 
+
 #wraps function in the app.route decorator.
 #if either of these routes gets sent by the 
 #browser, this HelloWorld function gets executed
+#you can stack decorators in python
+#the first one calls the second
+#which calls the function below
+#useful for having different URLs route 
+#to the same place
 @app.route('/')
-@app.route('hello')
+@app.route('/hello')
 def HelloWorld():
 	return "Hello World"
 
