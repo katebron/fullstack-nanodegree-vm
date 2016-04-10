@@ -6,6 +6,15 @@ from flask import Flask
 #defined for the application and all the imports it uses
 app = Flask(__name__)
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Base, Restaurant, MenuItem
+
+engine = create_engine('sqlite:///restaurantmenu.db')
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
 
 #wraps function in the app.route decorator.
 #if either of these routes gets sent by the 
@@ -16,9 +25,23 @@ app = Flask(__name__)
 #useful for having different URLs route 
 #to the same place
 @app.route('/')
-@app.route('/hello')
-def HelloWorld():
-	return "Hello World"
+#@app.route('/hello')
+#leave trailing slash so flask will render page even if not in url
+@app.route('/restaurants/<int:restaurant_id>/')
+def restaurantMenu(restaurant_id):
+	#restaurant = session.query(Restaurant).first()
+	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()
+	items = session.query(MenuItem).filter_by(restaurant_id = restaurant_id)
+	output = ''
+	for i in items:
+		output += "<p>"
+		output += i.name
+		output += '</br>'
+		output += i.price
+		output += '</br>'
+		output += i.description
+		output += '</p>'
+	return output
 
 #makes sure script is only run if it comes directly 
 #from the python interpreter (and therefore given
