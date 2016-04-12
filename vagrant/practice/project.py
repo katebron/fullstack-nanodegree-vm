@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, url_for, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem
@@ -17,20 +17,9 @@ session = DBSession()
 def restaurantMenu(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id)
-    output = ''
-    output += '<h1>%s</h1>' %restaurant.name
-    output += '<a href="/restaurants/new_menu/%s/">Add a new menu item</a></br></br>' % restaurant.id
-    for i in items:
-        output += i.name
-        output += '</br>'
-        output += i.price
-        output += '</br>'
-        output += i.description
-        output += '</br>'
-        output += '<a href="/restaurants/edit_item/%s/%s">Edit</a></br>' % (restaurant.id, i.id) 
-        output += '<a href="/restaurants/delete_item/%s/%s/">Delete</a>' % (restaurant.id, i.id)    
-        output += '</br></br>'    
-    return output
+    #render_template is the function to bring in the menu.html template, 
+    #plus the queries so the template has access to these variables.
+    return render_template('menu.html', restaurant=restaurant, items=items)
 
 # Task 1: Create route for newMenuItem function here
 
