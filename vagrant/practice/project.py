@@ -1,7 +1,7 @@
-from flask import Flask, url_for, render_template, request, redirect, flash
+from flask import Flask, url_for, render_template, request, redirect, flash, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Restaurant, MenuItem
+from database_setup2 import Base, Restaurant, MenuItem
 
 app = Flask(__name__)
 
@@ -11,6 +11,21 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+@app.route('/restaurants/<int:restaurant_id>/menu/JSON')
+def restaurantMenuJson(restaurant_id):
+	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()	
+	items = session.query(MenuItem).filter_by(restaurant_id = restaurant_id).all()
+	#instead of returning a template, return jsonify class
+	#with a loop to serialize all of the entries
+	return jsonify(MenuItems=[i.serialize for i in items])
+
+@app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON')
+def MenuItemJson(restaurant_id, menu_id):
+	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()	
+	items = session.query(MenuItem).filter_by(id = menu_id).one()
+	#instead of returning a template, return jsonify class
+	#with a loop to serialize all of the entries
+	return jsonify(MenuItems=[items.serialize])	
 
 @app.route('/')
 @app.route('/restaurants/<int:restaurant_id>/')
@@ -38,6 +53,7 @@ def newMenuItem(restaurant_id):
 # note in actual solutions the edit part is on the other side of the url from the id
 # like '/restaurants/int/int/edit'
 # same with delete
+# this doesn't actually work bc i don't have an edit menu template
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit',
            methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_id):
