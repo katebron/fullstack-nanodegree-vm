@@ -11,14 +11,16 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+#Outputs data only for API. All menu items for a given restaurant
 @app.route('/restaurants/<int:restaurant_id>/menu/JSON')
 def restaurantMenuJson(restaurant_id):
 	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()	
 	items = session.query(MenuItem).filter_by(restaurant_id = restaurant_id).all()
 	#instead of returning a template, return jsonify class
 	#with a loop to serialize all of the entries
-	return jsonify(MenuItems=[i.serialize for i in items])
+	return jsonify(MenuItems=[items.serialize])
 
+#Outputs data only for API: one menu item for a given restaurant
 @app.route('/restaurants/<int:restaurant_id>/menu/<int:menu_id>/JSON')
 def MenuItemJson(restaurant_id, menu_id):
 	restaurant = session.query(Restaurant).filter_by(id = restaurant_id).one()	

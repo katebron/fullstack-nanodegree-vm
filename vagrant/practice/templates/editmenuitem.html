@@ -1,0 +1,54 @@
+<html>
+<head>
+	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+	</head>
+<body>
+<div class = 'pane'>
+		<div class = 'header'>
+<h1>Edit {{item.name}} from {{restaurant.name}}</h1>
+    </div>
+   <!-- <div class="flash">
+	{% with messages = get_flashed_messages() %}
+{% if messages %}
+	<ul>
+	{% for message in messages %}
+		<li><strong> {{ message }} </strong></li>
+	{% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+</div>-->
+<!--<a href="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}">Create New Menu Item</a>-->
+
+
+<div class="nameAndPrice">
+<form action = " {{ url_for('editMenuItem', restaurant_id=restaurant.id, menu_id=item.id) }} "
+  method = "POST">
+
+<span class="name">
+<p>{{item.name}}</p>
+  Edit: <input type="text" name="name" size='30' value="{{ item.name }}">
+</span>
+
+<span class="price">
+<p> {{item.price}} </p>
+  Edit: <input type="text" name="price" size='10' value=" {{ item.price }} ">
+</span>
+<span class="description">
+<p>{{item.description}}</p>
+  Edit: <input type="text" name="description" size='100' value=" {{ item.description }}">
+</span>
+  <input type='submit' value='Submit'>
+  </form>
+<div class = "editdeletepane">
+<p>
+	<a href="{{ url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_id=item.id) }}">Delete</a>
+</p>
+</div>
+
+
+</div>
+</div>
+</body>
+
+</html>	
