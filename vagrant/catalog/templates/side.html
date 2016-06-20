@@ -1,0 +1,29 @@
+<div class="side">
+	<div class="">
+		<!--<a href="{{url_for('showPlaylists')}}">-->
+			<span class="glyphicon glyphicon-home" aria-hidden="true"></span>Recently Added Songs
+		</a>
+	</div>
+	<!--<div class="col-md-1 text-right">-->
+	<div>
+	{% if items !=[] %}	
+		<div class="">
+			<div class=""></div>
+			<div class="">
+				<h2>Songs</h2>
+					{% for i in items %}
+					<div class="">
+						<h3>{{i.title}}</h3>
+						<p>Performed by: {{i.performed_by}}</p>
+						<p>From the album: {{i.album}}</p>
+						<p><em>{{i.notes}}</em></p>
+					</div>
+				{% endfor %}
+			</div>
+			
+			<div class=""></div>
+		</div>
+	{% endif %}			
+		
+	</div>
+</div>

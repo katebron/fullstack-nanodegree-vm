@@ -47,9 +47,13 @@
 				<div class="col-md-1"></div>
 					<div class="col-md-10 restaurant-list">
 						<h3>{{playlist.title}}</h3>
+						{% if playlist.description %}
+						<p class="description">{{playlist.description}}</p>
+						{% endif %}
 					</div>
-				<div class="col-md-1"></div>
+				
 			</div>
 		</a>
 	{% endfor %}
 {% endblock %}
+<div class="side">{% include "side.html" %}</div>
