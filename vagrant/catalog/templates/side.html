@@ -13,10 +13,10 @@
 				<h2>Songs</h2>
 					{% for i in items %}
 					<div class="">
-						<h3>{{i.title}}</h3>
-						<p>Performed by: {{i.performed_by}}</p>
-						<p>From the album: {{i.album}}</p>
-						<p><em>{{i.notes}}</em></p>
+						<h3>{{i.Song.title}}</h3>
+						<p>Performed by: {{i.Song.performed_by}}</p>
+						<p>From the album: {{i.Song.album}}</p>
+						<p>In {{i.User.name}}'s: <a href = "{{url_for('showSongs', playlist_id = i.Song.playlist_id)}}">{{i.Playlist.title}}</a> playlist</p>
 					</div>
 				{% endfor %}
 			</div>
