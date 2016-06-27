@@ -4,17 +4,19 @@
 	<div class="row top-menu">
 		<div class="col-md-10"></div>
 		<div class="col-md-2 text-right">
-					</div>
+      <a href="{{url_for('disconnect')}}">Disconnect </a>
+
+    </div>
 	</div>
 	<div class="row divider blue">
-		<div class="col-md-12"></div>
-	</div>
-	<div class="row banner main">
-		<div class="col-md-1"></div>
-		<div class="col-md-11 padding-none">
-			<h1>Playlists</h1>
-		</div>
-	</div>
+    <div class="col-md-12"></div>
+  </div>
+
+  <div class="row banner main">
+    <div class="col-md-1"></div>
+    <div class="col-md-8 padding-none">
+      <h1>Playlists</h1>
+	
 
 <div class = 'flash'>
 		      {% with messages = get_flashed_messages() %}
@@ -35,25 +37,32 @@
 		<div class="col-md-10 padding-none">
 			<a href="{{url_for('newPlaylist')}}">
 				<button class="btn btn-default" id="new-restaurant">
-					<span class="glyphicon glyphicon-cutlery" aria-hidden="true"></span>Add Playlist
+					<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>Add Playlist
 				</button>
 			</a>
-		</div>
-		<div class="col-md-1"></div>
-	</div>
-	{% for playlist in playlists %}
-		<a href = "{{url_for('showSongs', playlist_id = playlist.id)}}">
-			<div class="row">
-				<div class="col-md-1"></div>
-					<div class="col-md-10 restaurant-list">
-						<h3>{{playlist.title}}</h3>
-						{% if playlist.description %}
-						<p class="description">{{playlist.description}}</p>
-						{% endif %}
-					</div>
+		
+
+		{% for playlist in playlists %}
+			<a href = "{{url_for('showSongs', playlist_id = playlist.id)}}">
+				<div class="row">
+					<div class="col-md-1"></div>
+						<div class="col-md-10 restaurant-list">
+							<h3>{{playlist.title}}</h3>
+							{% if playlist.description %}
+							<p class="description">{{playlist.description}}</p>
+							{% endif %}
+						</div>
 				
 			</div>
 		</a>
 	{% endfor %}
+</div>
+  </div>
+</div>
+<div>
+  <div class="col-md-3 side">
+
+{% include "side.html" %}
+  </div>
 {% endblock %}
-<div class="side">{% include "side.html" %}</div>
+ 

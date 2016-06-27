@@ -30,16 +30,34 @@ playlist1 = Playlist(user_id=1, title="Monday Tunes", description="Songs for get
 session.add(playlist1)
 session.commit()
 
-song1 = Song(user_id=1, title="Cardinal Cross", performed_by="Mount Mariah", album="Skeptic Goodbye", notes="Matt S. likes", playlist=playlist1)
+song1 = Song(user_id=1, album="Cardinal Cross", performed_by="Mount Mariah", title="Skeptic Goodbye", notes="Matt S. likes", playlist=playlist1)
 
 
 session.commit()
 
-song2 = Song(user_id=1, title="Cardinal Cross", performed_by="Mount Mariah", album="How to Dance", notes="", playlist=playlist1)
+song2 = Song(user_id=1, album="Cardinal Cross", performed_by="Mount Mariah", title="How to Dance", notes="", playlist=playlist1)
 
 session.add(song2)
 session.add(song1)
 session.commit()
+
+User2 = User(name="Coco", email="nola@me.com")
+session.add(User2)
+session.commit()
+
+playlist2 = Playlist(user_id=2, title="Friend karaoke", description="Y'all know this song")
+
+session.add(playlist2)
+session.commit()
+
+song3 = Song(user_id=2, title="We belong", performed_by="Pat Benatar", album="Tropico", notes="Whatever you deny or convey...", playlist=playlist2)
+
+song4 = Song(user_id=2, title="Bohemian Rhapsody", performed_by="Queen", album="A night at the opera", notes="How do i know these words", playlist=playlist2)
+
+session.add(song3)
+session.add(song4)
+session.commit()
+
 '''menuItem1 = MenuItem(user_id=1, name="French Fries", description="with garlic and parmesan",
                      price="$2.99", course="Appetizer", restaurant=restaurant1)
 

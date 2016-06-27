@@ -315,9 +315,10 @@ def newPlaylist():
     if request.method == 'POST':
         newPlaylist = Playlist(title=request.form['title'], description=request.form['description'], user_id=login_session['user_id'])
         session.add(newPlaylist)
+        #playlist = session.query(Playlist).filter(Playlist.title == request.form['title'])
         flash('New Playlist %s Successfully Created' % newPlaylist.title)
         session.commit()
-        return redirect(url_for('showPlaylists'))
+        return redirect(url_for('newSong', playlist_id = newPlaylist.id))
     else:
         return render_template('new_playlist.html')
 
@@ -354,9 +355,9 @@ def editPlaylist(playlist_id):
 # Create a new menu item
 @app.route('/playlist/<int:playlist_id>/song/new/', methods=['GET', 'POST'])
 def newSong(playlist_id):
+    playlist = session.query(Playlist).filter_by(id=playlist_id).one()
     if 'username' not in login_session:
         return redirect('/login')
-    playlist = session.query(Playlist).filter_by(id=playlist_id).one()
     if login_session['user_id'] != playlist.user_id:
         return "<script>function myFunction() {alert('You are not authorized to add menu items to this restaurant. Please create your own restaurant in order to add items.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
@@ -365,9 +366,9 @@ def newSong(playlist_id):
         session.add(newSong)
         session.commit()
         flash('New Song %s Item Successfully Created' % (newSong.title))
-        return redirect(url_for('showSongs', playlist_id=playlist_id))
+        return redirect(url_for('showSongs', playlist_id = playlist.id))
     else:
-        return render_template('new_song.html', playlist_id=playlist_id)
+        return render_template('new_song.html', playlist = playlist)
 
 # Delete a playlist
 @app.route('/playlist/<int:playlist_id>/delete/', methods=['GET', 'POST'])
@@ -419,7 +420,7 @@ def deleteSong(playlist_id, song_id):
         return redirect('/login')
     playlist = session.query(Playlist).filter_by(id=playlist_id).one()
     songToDelete = session.query(Song).filter_by(id=song_id).one()
-    if login_session['user_id'] != restaurant.user_id:
+    if login_session['user_id'] != songToDelete.user_id:
         return "<script>function myFunction() {alert('You are not authorized to delete songs in this playlist.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         session.delete(songToDelete)
