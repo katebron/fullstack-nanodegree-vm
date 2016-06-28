@@ -300,7 +300,7 @@ def allSongsJSON():
 @app.route('/')
 @app.route('/playlist/')
 def showPlaylists():
-    playlists = session.query(Playlist).order_by(asc(Playlist.title))
+    playlists = session.query(Playlist,User).filter(Playlist.user_id == User.id).order_by(Playlist.id.desc())
     songs = session.query(Song,Playlist,User).filter(Song.playlist_id == Playlist.id, Song.user_id == User.id).order_by(Song.id.desc()).limit(2)
     if 'username' not in login_session:
         return render_template('public_playlists.html', playlists=playlists, items = songs)

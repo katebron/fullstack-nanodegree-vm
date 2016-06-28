@@ -2,8 +2,8 @@
 {% block content %}
 {% include "header.html" %}
   <div class="row top-menu">
-    <div class="col-md-10"></div>
-    <div class="col-md-2 text-right">
+    <div class="col-md-8"></div>
+    <div class="col-md-4 text-right loginlogout">
        <a href="{{url_for('showLogin')}}"> <span class="glyphicon glyphicon-user" aria-hidden="true"></span> Click Here to Log in </a>
 
     </div>
@@ -14,21 +14,23 @@
 
   <div class="row banner main">
     <div class="col-md-1"></div>
-    <div class="col-md-8 padding-none">
+    <div class="col-md-8">
       <h1>Playlists</h1>
    
 
  
-<div class="row padding-top padding-bottom">
- {% for playlist in playlists %}
-    <a href = "{{url_for('showSongs', playlist_id = playlist.id)}}">
+<div class="row padding-top padding-bottom playlist_list">
+ {% for p in playlists %}
+    <a href = "{{url_for('showSongs', playlist_id = p.Playlist.id)}}" class="playlist">
       <div class="row">
-        <div class="col-md-1"></div>
-          <div class="col-md-10 restaurant-list">
-            <h3><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> {{playlist.title}}</h3>
-            {% if playlist.description %}
-            <p class="description">{{playlist.description}}</p>
-            {% endif %}
+
+          <div class="col-md-10 playlist-entry">
+            <h3><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> {{p.Playlist.title}}</h3>
+            {% if p.Playlist.description %}
+            <p class="description">{{p.Playlist.description}}</p>
+           {% endif %}
+            <p class="creator">By {{ p.User.name }}</p>
+
           </div>
         
       </div>
@@ -39,7 +41,7 @@
   {% endfor %}
   </div>
 </div>
-<div>
+
   <div class="col-md-3 side">
 
 {% include "side.html" %}

@@ -1,17 +1,22 @@
 {% extends "main.html" %}
 {% block content %}
 {% include "header.html" %}
+
 	<div class="row divider green">
 		<div class="col-md-12"></div>
 	</div>
-	<div class="row banner menu">
-		<div class="col-md-11 col-md-offset-1 padding-none">
-			<h1>{{creator.name}}'s "{{ playlist.title}}" Playlist</h1>
-			<img src = "{{ creator.picture }}"  />
+	<div class="row padding-top padding-bottom">
+		<div class="col-md-1">
+		{% if creator.picture %}
 			<figure class="creator">
+				<img src = "{{ creator.picture }}" alt="Image of "{{ playlist.title }}" playlist's creator, {{creator.name}}"  />
+				<figcaption>{{ creator.name }}</figcaption>
 			</figure>
-			</h1>
-
+			{% endif %}</div>
+		<div class="col-md-11 padding-none">
+			<h1>{{creator.name}}'s "{{ playlist.title}}" Playlist</h1>
+			
+			
 		</div>
 	</div>
 
