@@ -28,7 +28,7 @@ session = DBSession()
 
 # User Helper Functions
 
-
+# Add user by authentication data
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session[
                    'email'], picture=login_session['picture'])
@@ -37,12 +37,12 @@ def createUser(login_session):
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
-
+# Return user info - look up in User table by id
 def getUserInfo(user_id):
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
-
+# Return user ID, look up by email
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
@@ -62,7 +62,7 @@ def showLogin():
     return render_template('login.html', STATE=state)
 
 
-
+# Gconnect function - get user credentials & info from google auth
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
     # Validate state token
@@ -155,7 +155,7 @@ def gconnect():
 
 # DISCONNECT - Revoke a current user's token and reset their login_session
 
-
+# disconnect if user logged in via google authentication
 @app.route('/gdisconnect')
 def gdisconnect():
     # Only disconnect a connected user.
@@ -176,7 +176,7 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
 
-
+# user credentials from facebook
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
     if request.args.get('state') != login_session['state']:
@@ -242,6 +242,7 @@ def fbconnect():
     flash("Now logged in as %s" % login_session['username'])
     return output
 
+# disconnect a Facebook-authenticated user
 @app.route('/fbdisconnect')
 def fbdisconnect():
     facebook_id = login_session['facebook_id']
@@ -275,7 +276,7 @@ def disconnect():
         flash("You were not logged in")
         return redirect(url_for('showPlaylists'))
 
-# JSON API to view Restaurant Information
+# JSON API to view all playlists
 @app.route('/playlist/JSON')
 def playlistsJSON():
     playlists = session.query(Playlist).all()
@@ -308,6 +309,7 @@ def showPlaylists():
     else:
         return render_template('playlist.html', playlists=playlists, items = songs)
 
+# Add a playlist if logged in. If user filled out form, create a new playlist with form data
 @app.route('/playlist/new/', methods=['GET', 'POST'])
 def newPlaylist():
     if 'username' not in login_session:
@@ -315,13 +317,13 @@ def newPlaylist():
     if request.method == 'POST':
         newPlaylist = Playlist(title=request.form['title'], description=request.form['description'], user_id=login_session['user_id'])
         session.add(newPlaylist)
-        #playlist = session.query(Playlist).filter(Playlist.title == request.form['title'])
         flash('New Playlist %s Successfully Created' % newPlaylist.title)
         session.commit()
         return redirect(url_for('newSong', playlist_id = newPlaylist.id))
     else:
         return render_template('new_playlist.html')
 
+# See all the songs in a playlist
 @app.route('/playlist/<int:playlist_id>/')
 @app.route('/playlist/<int:playlist_id>/songs/')
 def showSongs(playlist_id):
@@ -329,11 +331,13 @@ def showSongs(playlist_id):
     creator = getUserInfo(playlist.user_id)
     items = session.query(Song).filter_by(
         playlist_id=playlist_id).all()
+    # if user is not logged in, give them a page without CRUD links
     if 'username' not in login_session or creator.id != login_session['user_id']:
         return render_template('public_list_of_songs.html', items=items, playlist=playlist, creator=creator)
     else:
         return render_template('list_of_songs.html', items=items, playlist=playlist, creator=creator)
 
+# Edit a playlist if logged in and owner of playlist
 @app.route('/playlist/<int:playlist_id>/edit/', methods=['GET', 'POST'])
 def editPlaylist(playlist_id):
     editedPlaylist = session.query(
@@ -352,7 +356,7 @@ def editPlaylist(playlist_id):
     else:
         return render_template('edit_playlist.html', playlist=editedPlaylist)
 
-# Create a new menu item
+# Create a new song if logged in
 @app.route('/playlist/<int:playlist_id>/song/new/', methods=['GET', 'POST'])
 def newSong(playlist_id):
     playlist = session.query(Playlist).filter_by(id=playlist_id).one()
@@ -388,7 +392,7 @@ def deletePlaylist(playlist_id):
     else:
         return render_template('delete_playlist.html', playlist=playlistToDelete)
 
-# Delete a song
+# Edit song if you are a owner
 @app.route('/playlist/<int:playlist_id>/song/<int:song_id>/edit', methods=['GET', 'POST'])
 def editSong(playlist_id, song_id):
     if 'username' not in login_session:
@@ -413,7 +417,7 @@ def editSong(playlist_id, song_id):
     else:
         return render_template('edit_song.html', playlist_id=playlist_id, song_id=song_id, item=editedSong)
 
-# Delete a menu item
+# Delete a song
 @app.route('/playlist/<int:playlist_id>/song/<int:song_id>/delete', methods=['GET', 'POST'])
 def deleteSong(playlist_id, song_id):
     if 'username' not in login_session:
