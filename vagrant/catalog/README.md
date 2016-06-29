@@ -7,14 +7,15 @@ INSTALL
 -------------------------
 To use, run python to install 
 
-```python project.py
- 
-```
+```sh
+python project.py
+``` 
 
 If you would like to pre-populate the catalog with playlists and songs, run 
-```python load_playlists.py
- 
-```
+```sh
+python load_playlists.py
+``` 
+
 
 
 AUTHENTICATION

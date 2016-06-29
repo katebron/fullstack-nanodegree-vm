@@ -85,6 +85,7 @@ a:hover{
 
 .creator img {
 	width: 50px;
+	max-height: 100px;
 	border-radius: 50%;
 
 }
@@ -93,6 +94,8 @@ a:hover{
 	color: #7B7573;
 	font-weight: 400;
 	margin-top: 0px;
+	padding-left: 0.5em;
+
 }
 
 /*Form buttons*/
